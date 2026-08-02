@@ -1,6 +1,7 @@
 from sympy import *
 from llama_cpp import Llama, LlamaGrammar
 import json
+from stock_operations import *
 
 TOOLS = ["differentiate","integrate","expand","factor","simplify","substitute","solve","finish"]
 
@@ -68,6 +69,14 @@ def create_prompt(state):
         Choose the next action.
         """
 
+def is_duplicate_expression(state, expression):
+
+    for node in state["equations"].values():
+        if simplify(node["expression"] - expression) == 0:
+            return True
+
+    return False
+
 grammar = LlamaGrammar.from_string(r'''
 root ::= tool " " equation " " variable
 
@@ -84,6 +93,9 @@ def create_action_grammar(state):
     available_actions = []
 
     for eq_id, eq in state["equations"].items():
+
+        if eq["type"] == "solution":
+            continue
 
         # 1. Differentiate functions
         if eq["type"] == "function":
@@ -146,8 +158,6 @@ def create_action_grammar(state):
     return LlamaGrammar.from_string(grammar)
 
 
-
-
 llm = Llama(model_path=r"C:\Users\PC\Documents\Github-RAG\qwen2.5-coder-7b-instruct-q4_k_m-00001-of-00002.gguf",n_ctx=2048,n_threads=8, verbose=False)
 existing_eqs = []
 
@@ -165,37 +175,28 @@ while True:
     )
 
     print(response["choices"][0]["text"])
-    tool, equation, variable = response["choices"][0]["text"].split()
+    if len(response["choices"][0]["text"].split()) == 3:
+        tool, equation, variable = response["choices"][0]["text"].split()
+    else:
+        tool, equation = response["choices"][0]["text"].split()
 
+    if tool in OPERATIONS:
 
-    if tool == "differentiate":
-        variable = Symbol(variable)
-        result = diff(state["equations"][equation]["expression"], variable)
+        executor = OPERATIONS[tool]["executor"]
 
-        new_id = get_new_equation_id(state)
+        if tool in ["differentiate", "solve"]:
+            new_node = executor(
+                state,
+                equation,
+                variable
+            )
 
+        elif tool == "simplify":
+            new_node = executor(
+                state,
+                equation
+            )
 
-        state["equations"][new_id] = {
-            "expression": result,
-            "type": "derivative",
-            "variable": str(variable),
-            "parents": [equation],
-            "generated_by": "differentiate",
-            "description": f"Derivative of {equation}"
-        }
-    elif tool == "solve":
-        variable = Symbol(variable)
-        eq = state["equations"][equation]["expression"]
-
-        result = solve(Eq(eq,0), x)
-
-        new_id = get_new_equation_id(state)
-
-        state["equations"][new_id] = {
-            "expression": result,
-            "type": "derivative",
-            "variable": str(variable),
-            "parents": [equation],
-            "generated_by": "differentiate",
-            "description": f"Derivative of {equation}"
-        }
+        if not is_duplicate_expression(state, new_node["expression"]):
+            new_id = get_new_equation_id(state)
+            state["equations"][new_id] = new_node
