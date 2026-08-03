@@ -2,6 +2,7 @@ from sympy import *
 from llama_cpp import Llama, LlamaGrammar
 import json
 from stock_operations import *
+from goal_specification import * 
 
 TOOLS = ["differentiate","integrate","expand","factor","simplify","substitute","solve","finish"]
 
@@ -174,8 +175,6 @@ def create_action_grammar(state):
     return LlamaGrammar.from_string(grammar)
 
 
-
-
 """
 #########################################
 """
@@ -185,15 +184,36 @@ existing_eqs = []
 
 from goal_compiler import compile_goal
 
-goal = compile_goal(f"{state['goal']}\n\n", llm)
+goal_specification = compile_goal(f"{state['goal']}\n\n", llm)
+
+print("GoalSpecification:")
+print(goal_specification)
 
 while True:
     print(f"\nState: {state}")
+    solved = False
 
-     print(state)
+    """ Return nodes with the expected solution type (number or function etc.) """
+    candidates = CandidateExtractor.extract(state,goal_specification.object_type)
 
-    # First check if current state solves the problem
-    result = goal.evaluate(state)
+    for candidate in candidates:
+        all_success = True
+        total_score = 0
+
+        for condition in goal_specification.conditions:
+            success, score = condition.evaluate(candidate,state)
+
+            all_success &= success
+            total_score += score
+
+        if all_success:
+            print("SOLUTION")
+            print(candidate)
+            solved = True
+            break
+    if solved:
+        break
+
 
 
     prompt = create_prompt(state)

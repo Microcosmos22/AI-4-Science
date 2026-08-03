@@ -143,4 +143,5 @@ def compile_goal(problem_statement, llm):
 
     print(response_text)
 
+    # returns a GoalSpecification
     return parse_goal(response_text)

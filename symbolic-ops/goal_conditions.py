@@ -3,22 +3,10 @@
 from abc import ABC, abstractmethod
 
 
-class GoalCondition(ABC):
-    """
-    A mathematical condition that a candidate solution must satisfy.
-    """
+class GoalCondition:
 
-    @abstractmethod
     def evaluate(self, candidate, state):
-        """
-        Returns
-        -------
-        success : bool
-        score : float
-
-        score is 0 for a perfect solution and increases with error.
-        """
-        pass
+        raise NotImplementedError
 
 
 class FitsMeasurements(GoalCondition):
@@ -73,20 +61,52 @@ class FitsMeasurements(GoalCondition):
 
 class DerivativeEqualsZero(GoalCondition):
 
-    def __init__(self, function):
-        self.function = function
+    def __init__(self, target):
+        self.target = target
 
     def evaluate(self, candidate, state):
 
-        variable = self.function["variable"]
-        expression = self.function["expression"]
+        node = candidate["node"]
 
-        derivative = sp.diff(expression, variable)
+        # Must be a solution
+        if node["type"] != "solution":
+            return False
 
-        value = derivative.subs(variable, candidate)
+        # It must come from a derivative equation
+        parents = node.get("parents", [])
 
-        success = sp.simplify(value) == 0
+        for parent_id in parents:
 
-        score = abs(float(value))
+            parent = state["equations"][parent_id]
 
-        return success, score
+            if parent["type"] == "derivative":
+                return True, 0
+
+        return False, 1
+
+
+class SecondDerivativePositive(GoalCondition):
+
+    def __init__(self, target):
+        self.target = target
+
+    def evaluate(self, candidate, state):
+
+        solution = candidate["node"]["expression"]
+
+        x = solution.rhs
+
+        function = state["equations"]["eq1"]
+
+        second = diff(
+            function["expression"],
+            function["variable"],
+            2
+        )
+
+        value = second.subs(
+            function["variable"],
+            x
+        )
+
+        return value > 0, 0

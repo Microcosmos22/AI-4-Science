@@ -17,56 +17,52 @@ from dataclasses import dataclass
 }
 """
 
-
-@dataclass
 class GoalSpecification:
 
-    object_type: str
-    conditions: list
-    constraints: list
+    def __init__(self, object_type, conditions, constraints):
+        self.object_type = object_type
+        self.conditions = conditions
+        self.constraints = constraints
 
 
-    def evaluate(self, state):
+class CandidateExtractor:
 
-        candidates = find_candidates(
-            state,
-            self.object_type
-        )
+    @staticmethod
+    def extract(state, object_type):
 
-        best_score = float("inf")
-        best_candidate = None
+        candidates = []
 
-        for candidate in candidates:
+        for eq_id, node in state["equations"].items():
 
-            total_score = 0
-            success = True
+            if object_type == "number":
 
-            for condition in self.conditions:
+                if node["type"] == "solution":
 
-                ok, score = condition.evaluate(
-                    candidate,
-                    state
+                    candidates.append(
+                        {
+                            "id": eq_id,
+                            "node": node
+                        }
+                    )
+
+            elif object_type == "function":
+
+                if node["type"] == "function":
+
+                    candidates.append(
+                        {
+                            "id": eq_id,
+                            "node": node
+                        }
+                    )
+
+            elif object_type == "equation":
+
+                candidates.append(
+                    {
+                        "id": eq_id,
+                        "node": node
+                    }
                 )
 
-                success &= ok
-                total_score += score
-
-
-            if total_score < best_score:
-                best_score = total_score
-                best_candidate = candidate
-
-
-            if success:
-                return GoalResult(
-                    True,
-                    candidate,
-                    0
-                )
-
-
-        return GoalResult(
-            False,
-            best_candidate,
-            best_score
-        )
+        return candidates
