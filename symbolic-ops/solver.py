@@ -174,6 +174,12 @@ def create_action_grammar(state):
     return LlamaGrammar.from_string(grammar)
 
 
+
+
+"""
+#########################################
+"""
+
 llm = Llama(model_path=r"C:\Users\PC\Documents\Github-RAG\qwen2.5-coder-7b-instruct-q4_k_m-00001-of-00002.gguf",n_ctx=2048,n_threads=8, verbose=False)
 existing_eqs = []
 
@@ -183,6 +189,12 @@ goal = compile_goal(f"{state['goal']}\n\n", llm)
 
 while True:
     print(f"\nState: {state}")
+
+     print(state)
+
+    # First check if current state solves the problem
+    result = goal.evaluate(state)
+
 
     prompt = create_prompt(state)
     grammar = create_action_grammar(state)
