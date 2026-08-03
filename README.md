@@ -32,12 +32,39 @@ called nodes. They contain a mathematical expression, the object type, its relat
         "type": "function",
         "variable": "x",
         "description": "quadratic polynomial"
+        "parents": None
         }
 ```
 
-We can transform this expression, combine it with others, to generate new knowledge. The graph containing all information 
-and its relations is called a knowledge graph. This is an important piece of scientific discovery, responsible for induction
-from experiments, deduction and scientific reasoning.
+We can transform this expression, combine it with others, to generate new knowledge. Applying the correct transformations, we can gain new information:
+```
+        Goal:
+Find the stationary points of x**2 + 2*x + 1
+
+(Full solution using knowledge tree, goal-aware expansion stop, pruning duplicate nodes etc.)
+
+            eq1:
+              expression: x**2 + 2*x + 1
+              type: function
+              description: quadratic polynomial
+
+            eq2:
+              expression: 2*x + 2
+              type: derivative
+              description: Derivative of eq1
+              derived from: ['eq1']
+
+            eq3:
+              expression: Eq(x, -1)
+              type: solution
+              description: Solution of eq2
+              derived from: ['eq2']
+```
+
+
+The graph containing all nodes and the space of all actions that relate them, is a knowledge graph. This tree contains scientific discovery but also
+an enourmous space of transformations that do not generate any new knowledge. When expanded in the right direction, the **symbolic solver is responsible for induction
+from experiments, deduction and scientific reasoning**.
 
 ### Roadmap for the symbolic reasoner
 One could argue that performing open-ended discovery differs from problem solving, where we know the correct direction
