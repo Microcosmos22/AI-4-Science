@@ -70,10 +70,26 @@ def create_prompt(state):
         """
 
 def is_duplicate_expression(state, expression):
-
     for node in state["equations"].values():
-        if simplify(node["expression"] - expression) == 0:
-            return True
+        other = node["expression"]
+
+        # Different object types -> definitely different
+        if type(other) is not type(expression):
+            continue
+
+        if isinstance(expression, Equality):
+            if (simplify(expression.lhs - other.lhs) == 0 and
+                simplify(expression.rhs - other.rhs) == 0):
+                return True
+
+            # Optional: consider Eq(a,b) == Eq(b,a)
+            if (simplify(expression.lhs - other.rhs) == 0 and
+                simplify(expression.rhs - other.lhs) == 0):
+                return True
+
+        else:
+            if simplify(other - expression) == 0:
+                return True
 
     return False
 
@@ -166,6 +182,7 @@ while True:
 
     prompt = create_prompt(state)
     grammar = create_action_grammar(state)
+    print(prompt)
 
     response = llm(
         prompt,
