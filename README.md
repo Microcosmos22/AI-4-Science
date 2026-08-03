@@ -42,6 +42,21 @@ from experiments, deduction and scientific reasoning.
 ### Roadmap for the symbolic reasoner
 One could argue that performing open-ended discovery differs from problem solving, where we know the correct direction
 for the flow of knowledge. However we must not forget that at the end of every research we will always meet a ground
-truth in the form of an observation of the real world. In open-ended research we deal with an enormous hypothesis space and 
-should not brute-force all operations. The real challenge is to train our scientific planner to make useful progress,
-make the right reseadecisions
+truth in the form of an observation of the real world. In open-ended research we deal with an enormous hypothesis space and should not brute-force all operations. The real challenge is to train our scientific planner to make useful progress, make the right research decisions. The main metrics for scientific progress are: Predictive power, Compression/simplicity, novelty, generality and precision, in descending order of importance.
+
+We asked ChatGPT to make a roadmap for this project, including different milestones:
+1. A symbolic reasoner that solves physics problems from equations.
+2. Add observations datasets as inputs.
+3. Re-discover known physics: Given equations prior to a discovery (prior to Newtons classical mechanics), recover known physics laws.
+4. Implement literature: Using a RAG Agent, re-discover known physics using also the text contexts.
+5. Novel scientific discovery multi-agent.
+
+### Scope of this repository
+The symbolic reasoner has an internal library of mathematical operations than span the space of possible actions. This will grow over time, but
+we intend to solve two different problems using the same code (given to it as Text):
+1. "Problem:
+
+    Find the stationary points of x**2 + 2*x + 1"
+2. "Given a noisy dataset of a trajectory in a plane $(t,x,y)_i$, find the equation of the objects trajectory that makes the best fit" (parabola/cannonball)
+
+
