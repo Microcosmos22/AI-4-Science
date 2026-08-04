@@ -2,7 +2,6 @@ from sympy import (
     symbols, Function, sin, cos, exp, log,
     sinh, cosh, sqrt, tan,
     besseli, besselk, besselj, bessely,
-    AiryAi, AiryBi,
     gamma
 )
 
@@ -144,18 +143,4 @@ MODEL_LIBRARY = {
         "parameters": [A, n, k]
     },
 
-
-    # -------------------------
-    # Airy functions
-    # -------------------------
-
-    "airy_ai": {
-        "expression": A*AiryAi(k*t),
-        "parameters": [A, k]
-    },
-
-    "airy_bi": {
-        "expression": A*AiryBi(k*t),
-        "parameters": [A, k]
-    }
 }

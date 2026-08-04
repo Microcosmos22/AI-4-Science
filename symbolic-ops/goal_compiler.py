@@ -20,51 +20,20 @@ CONDITION_CLASSES = {
 
 GOALFINDER_PROMPT = """
 You are a mathematical goal compiler.
+Given the problem statement, find a characterization for the expected solution in the following format:
 
-Translate the problem statement into the goal specification language.
+object_type;condition;domain
 
-Output ONLY the goal specification.
+Explanation/Rules:
+1. What set is the solution expected to be in? (object_type)
+Options: number, function, equation, matrix
 
-The object_type describes the final answer that should be returned.
+2. What conditions must that solution object satisfy? (condition)
+Options: FitsMeasurements, DerivativeEqualsZero
 
-Rules:
+3. In which range/domain must that condition be satisfied in? (domain)
+Options: None
 
-- If the answer is a value, root, point, parameter, or coordinate, use:
-number
-
-- If the answer is an explicit mathematical expression depending on variables, use:
-function
-
-- If the answer is a relation or equation itself, use:
-equation
-
-Examples:
-
-Problem:
-Find the stationary points of f(x)
-
-The answer is the x-values where the derivative is zero.
-
-Output:
-number;DerivativeEqualsZero(original_function);None
-
-
-Problem:
-Find the trajectory from measured points
-
-The answer is a function x(t), y(t).
-
-Output:
-function;FitsMeasurements(observations);None
-
-
-Problem:
-Write the equation that defines the stationary points
-
-The answer is the equation f'(x)=0.
-
-Output:
-equation;DerivativeEqualsZero(original_function);None
 """
 
 
@@ -124,7 +93,7 @@ def parse_goal(text):
 def compile_goal(problem_statement, llm):
 
     prompt = f"""
-    Problem:
+    Problem statement:
 
     {problem_statement}
 

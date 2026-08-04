@@ -2,6 +2,7 @@ from sympy import *
 from llama_cpp import Llama, LlamaGrammar
 import json
 from stock_operations import *
+from stock_functions import *
 from goal_specification import *
 
 TOOLS = ["differentiate","integrate","expand","factor","simplify","substitute","solve","finish"]
@@ -36,9 +37,12 @@ def state_to_prompt(state):
 
     return text
 
+with open(r"..\data\projectile.json", "r") as f:
+    observations = json.load(f)
+
 state_trajectory = {
 
-    "goal": "Given a set of points in a plane over time (x,y,t), find the trajectory function that best describes the particle's movement",
+    "goal": "Find the trajectory function given a set of points in a plane over time (x,y,t)",
 
     "equations": {
 
@@ -230,7 +234,6 @@ existing_eqs = []
 
 from goal_compiler import compile_goal
 
-print(state_trajectory['goal'])
 goal_specification = compile_goal(f"{state_trajectory['goal']}\n\n", llm)
 print(goal_specification)
 
@@ -241,19 +244,19 @@ while True:
     """ Return nodes with the expected solution type (number or function etc.) """
     candidates = CandidateExtractor.extract(state_trajectory,goal_specification.object_type)
 
-    for candidate in candidates:
+    for candidate_node in candidates:
         all_success = True
         total_score = 0
 
         for condition in goal_specification.conditions:
-            success, score = condition.evaluate(candidate,state_trajectory)
+            success, score = condition.evaluate(candidate_node,state_trajectory)
 
             all_success &= success
             total_score += score
 
         if all_success:
-            print("SOLUTION")
-            print(candidate)
+            print("SOLUTION NODE")
+            print(candidate_node)
             solved = True
             break
     if solved:
