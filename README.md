@@ -65,7 +65,7 @@ The actual mathematics is executed by deterministic symbolic tools such as
 
 For example, given the problem
 
-`Find the stationary points of $x^2+2x+1$`
+> Find the stationary points of \(x^2 + 2x + 1\)
 
 the planner generates the sequence
 
@@ -136,15 +136,12 @@ Examples include
 
 Deduction
 
-Find the stationary points of
-`$x^2+2x+1$`
+> Find the stationary points of \(x^2 + 2x + 1\)
 
 Induction
 
-Given noisy observations of a trajectory
-`$(t,x,y)$`
-infer the mathematical model that best explains the data.
+> Given noisy observations of a trajectory \( (t,x,y) \) infer the mathematical model that best explains the data.
 
 The long-term vision is that both tasks are instances of the same underlying problem:
 
-Search through the space of symbolic knowledge transformations until the generated theory best explains the available evidence.
+> Search through the space of symbolic knowledge transformations until the generated theory best explains the available evidence.
