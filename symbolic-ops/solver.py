@@ -2,7 +2,7 @@ from sympy import *
 from llama_cpp import Llama, LlamaGrammar
 import json
 from stock_operations import *
-from goal_specification import * 
+from goal_specification import *
 
 TOOLS = ["differentiate","integrate","expand","factor","simplify","substitute","solve","finish"]
 
@@ -188,6 +188,7 @@ goal_specification = compile_goal(f"{state['goal']}\n\n", llm)
 
 print("GoalSpecification:")
 print(goal_specification)
+print("Lets do induction")
 
 while True:
     print(f"\nState: {state}")
