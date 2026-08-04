@@ -24,7 +24,7 @@ Theory imperfect, re-formulate better hypothesis from literature
 
 ### Techniques: Knowledge-graphs
 In order for a computer to process scientific information, we separate each statement into minimal units of information,
-called nodes. They contain a mathematical expression, the object type, its related nodes (parents) and some explanation:
+called nodes. They might contain a number, a function, an equation, a dataset etc. accompanied by the object type, its related nodes (parents) and some text-based explanation:
 
 ```
 "eq1": {
@@ -36,7 +36,7 @@ called nodes. They contain a mathematical expression, the object type, its relat
         }
 ```
 
-We can transform this expression, combine it with others, to generate new knowledge. Applying the correct transformations, we can gain new information:
+We can transform or combine this information nodes to generate new knowledge. Applying the correct transformations, we are able to gain information or solve physics problems:
 ```
         You are a mathematical goal compiler.
         Translate the problem statement into the goal specification language.
@@ -50,6 +50,9 @@ number;DerivativeEqualsZero(original_function);None
 
 ####################################################################################
 KNOWLEDGE GRAPH - EXPLORATION OF HYPOTHESIS SPACE
+(The correct solution path using knowledge tree, goal-aware expansion stop, pruning duplicate nodes etc.)
+
+
  You are a scientific planning agent.
 
         Your task is to decide the next mathematical operation that moves
@@ -65,7 +68,7 @@ KNOWLEDGE GRAPH - EXPLORATION OF HYPOTHESIS SPACE
         Goal:
 Find the stationary points of x**2 + 2*x + 1
 
-(Full solution using knowledge tree, goal-aware expansion stop, pruning duplicate nodes etc.)
+
 
             eq1:
               expression: x**2 + 2*x + 1
