@@ -32,99 +32,119 @@ Refine Hypothesis using New Evidence
                                ▼ Repeat until convergence
 ```
 
-### Techniques: Knowledge-graphs
-In order for a computer to process scientific information, we separate each statement into minimal units of information,
-called nodes. They might contain a number, a function, an equation, a dataset etc. accompanied by the object type, its related nodes (parents) and some text-based explanation:
+### Techniques: Knowledge Graphs
+
+Scientific reasoning can be represented as a graph of symbolic knowledge. Instead of treating an entire document or equation as a single object, AI-4-Science decomposes scientific information into knowledge nodes. Each node represents one atomic piece of knowledge—a mathematical function, equation, dataset, numerical value, hypothesis, or observation—together with its semantic type and provenance.
+
+For example:
 
 ```
-"eq1": {
-        "expression": x**2+2*x+1,
-        "type": "function",
-        "variable": "x",
-        "description": "quadratic polynomial"
-        "parents": None
-        }
+eq1 = {
+    "expression": x**2 + 2*x + 1,
+    "type": "function",
+    "variable": "x",
+    "description": "Quadratic polynomial",
+    "parents": None
+}
 ```
 
-We can transform or combine this information nodes to generate new knowledge. Applying the correct transformations, we are able to gain information or solve physics problems:
+The graph explicitly stores how knowledge is generated. Every newly created node records which previous nodes produced it and which symbolic operation was applied. This allows every reasoning step to be inspected, verified, or reproduced.
+
+### Symbolic Planning
+
+Rather than asking an LLM to directly solve mathematical problems, the LLM only decides which symbolic operation should be performed next.
+
+The actual mathematics is executed by deterministic symbolic tools such as
+
+- Differentiate
+- Simplify
+- Solve
+- Fit
+- Integrate
+...
+
+For example, given the problem
+
+`Find the stationary points of $x^2+2x+1$`
+
+the planner generates the sequence
+
 ```
-        You are a mathematical goal compiler.
-        Translate the problem statement into the goal specification language.
-        Problem:
+differentiate(eq1)
 
-            Find the stationary points of x**2 + 2*x + 1
+↓
 
-GoalSpecification:
-number;DerivativeEqualsZero(original_function);None
-<goal_specification.GoalSpecification object at 0x00000233B415CEC0>
+solve(eq2)
 
-####################################################################################
-KNOWLEDGE GRAPH - EXPLORATION OF HYPOTHESIS SPACE
-(The correct solution path using knowledge tree, goal-aware expansion stop, pruning duplicate nodes etc.)
+↓
 
-
- You are a scientific planning agent.
-
-        Your task is to decide the next mathematical operation that moves
-        closer to the goal.
-
-        You have access to symbolic tools:
-
-        differentiate
-        simplify
-        solve
-        finish
-
-        Goal:
-Find the stationary points of x**2 + 2*x + 1
-
-
-
-            eq1:
-              expression: x**2 + 2*x + 1
-              type: function
-              description: quadratic polynomial
-differentiate eq1 x
-
-            eq2:
-              expression: 2*x + 2
-              type: derivative
-              description: Derivative of eq1
-              derived from: ['eq1']
-solve eq2 x
-            eq3:
-              expression: Eq(x, -1)
-              type: solution
-              description: Solution of eq2
-              derived from: ['eq2']
-
-GoalSpecification FOUND A SOLUTION
-{'id': 'eq3', 'node': {'expression': Eq(x, -1), 'type': 'solution', 'variable': 'x', 'parents': ['eq2'], 'generated_by': 'solve', 'description': 'Solution of eq2'}}
+finish
 ```
 
+while the symbolic engine performs every computation exactly.
 
-The graph containing all nodes and the space of all actions that relate them, is a knowledge graph. This tree contains scientific discovery but also
-an enourmous space of transformations that do not generate any new knowledge. When expanded in the right direction, the **symbolic solver is responsible for induction
-from experiments, deduction and scientific reasoning**.
+This separates planning from execution, making every reasoning step transparent and verifiable.
 
-### Roadmap for the symbolic reasoner
-One could argue that performing open-ended discovery differs from problem solving, where we know the correct direction
-for the flow of knowledge. However we must not forget that at the end of every research we will always meet a ground
-truth in the form of an observation of the real world. In open-ended research we deal with an enormous hypothesis space and should not brute-force all operations. The real challenge is to train our scientific planner to make useful progress, make the right research decisions. The main metrics for scientific progress are: Predictive power, Compression/simplicity, novelty, generality and precision, in descending order of importance.
+### Knowledge Graph Search
 
-We asked ChatGPT to make a roadmap for this project, including different milestones:
-1. A symbolic reasoner that solves physics problems from equations.
-2. Add observations datasets as inputs.
-3. Re-discover known physics: Given equations prior to a discovery (prior to Newtons classical mechanics), recover known physics laws.
-4. Implement literature: Using a RAG Agent, re-discover known physics using also the text contexts.
-5. Novel scientific discovery multi-agent.
+Solving scientific problems can be viewed as searching through a graph of possible knowledge transformations.
 
-### Scope of this repository
-The symbolic reasoner has an internal library of mathematical operations than span the space of possible actions. This will grow over time, but
-we intend to solve two different problems using the same code (given to it as Text):
-1. "Problem:
+Each symbolic operation expands the graph by generating new knowledge nodes. Most possible transformations are either redundant or irrelevant. The role of the planner is therefore not to perform mathematics, but to navigate efficiently through this enormous search space.
 
-    Find the stationary points of x**2 + 2*x + 1"
-2. "Given a noisy dataset of a trajectory in a plane $(t,x,y)_i$, find the equation of the objects trajectory that makes the best fit" (parabola/cannonball)
+Current optimizations include
 
+-goal-aware expansion,
+-duplicate pruning,
+-symbolic verification,
+-explicit provenance tracking.
 
+The same search framework naturally applies to
+
+-symbolic deduction,
+-hypothesis generation,
+-equation discovery,
+-scientific workflows.
+### Roadmap
+
+Problem solving and scientific discovery are fundamentally the same search process.
+
+The difference is that in open-ended discovery the target is unknown. Instead of searching for a predefined answer, the system searches for hypotheses that best explain observations.
+
+Ultimately, every scientific theory is evaluated against reality. Observations therefore act as the objective ground truth that guides exploration through the hypothesis space.
+
+The long-term objective is to train the planner to make increasingly effective research decisions by maximizing criteria such as
+
+1.predictive power,
+2.simplicity and compression,
+3.generality,
+4.novelty,
+5.precision.
+
+Current roadmap:
+
+-Symbolic reasoner for mathematical and physics problems.
+-Support observational datasets as first-class knowledge nodes.
+-Rediscover known physical laws from observations.
+-Integrate literature retrieval through a RAG pipeline.
+-Combine literature, symbolic reasoning and simulations into a closed-loop scientific agent.
+-Explore autonomous scientific discovery.
+### Scope of this Repository
+
+The symbolic reasoner maintains an extensible library of mathematical transformations. The same reasoning engine is intended to solve both deductive and inductive scientific problems.
+
+Examples include
+
+Deduction
+
+Find the stationary points of
+`$x^2+2x+1$`
+
+Induction
+
+Given noisy observations of a trajectory
+`$(t,x,y)$`
+infer the mathematical model that best explains the data.
+
+The long-term vision is that both tasks are instances of the same underlying problem:
+
+Search through the space of symbolic knowledge transformations until the generated theory best explains the available evidence.
