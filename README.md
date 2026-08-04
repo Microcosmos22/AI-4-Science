@@ -112,7 +112,7 @@ The difference is that in open-ended discovery the target is unknown. Instead of
 
 Ultimately, every scientific theory is evaluated against reality. Observations therefore act as the objective ground truth that guides exploration through the hypothesis space.
 
-The long-term objective is to train the planner to make increasingly effective research decisions by maximizing criteria such as
+The long-term objective is to train the planner to make increasingly effective research decisions by maximizing meta-research criteria such as
 
 1. predictive power,
 2. simplicity and compression,
@@ -128,6 +128,7 @@ Current roadmap:
 - Integrate literature retrieval through a RAG pipeline.
 - Combine literature, symbolic reasoning and simulations into a closed-loop scientific agent.
 - Explore autonomous scientific discovery.
+
 ### Scope of this Repository
 
 The symbolic reasoner maintains an extensible library of mathematical transformations. The same reasoning engine is intended to solve both deductive and inductive scientific problems.
