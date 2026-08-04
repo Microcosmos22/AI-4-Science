@@ -22,7 +22,7 @@ Perform Python simulation
 Theory imperfect, re-formulate better hypothesis from literature
 ```
 
-### Techniques
+### Techniques: Knowledge-graphs
 In order for a computer to process scientific information, we separate each statement into minimal units of information,
 called nodes. They contain a mathematical expression, the object type, its related nodes (parents) and some explanation:
 
@@ -38,6 +38,30 @@ called nodes. They contain a mathematical expression, the object type, its relat
 
 We can transform this expression, combine it with others, to generate new knowledge. Applying the correct transformations, we can gain new information:
 ```
+        You are a mathematical goal compiler.
+        Translate the problem statement into the goal specification language.
+        Problem:
+
+            Find the stationary points of x**2 + 2*x + 1
+
+GoalSpecification:
+number;DerivativeEqualsZero(original_function);None
+<goal_specification.GoalSpecification object at 0x00000233B415CEC0>
+
+####################################################################################
+KNOWLEDGE GRAPH - EXPLORATION OF HYPOTHESIS SPACE
+ You are a scientific planning agent.
+
+        Your task is to decide the next mathematical operation that moves
+        closer to the goal.
+
+        You have access to symbolic tools:
+
+        differentiate
+        simplify
+        solve
+        finish
+
         Goal:
 Find the stationary points of x**2 + 2*x + 1
 
@@ -47,18 +71,22 @@ Find the stationary points of x**2 + 2*x + 1
               expression: x**2 + 2*x + 1
               type: function
               description: quadratic polynomial
+differentiate eq1 x
 
             eq2:
               expression: 2*x + 2
               type: derivative
               description: Derivative of eq1
               derived from: ['eq1']
-
+solve eq2 x
             eq3:
               expression: Eq(x, -1)
               type: solution
               description: Solution of eq2
               derived from: ['eq2']
+
+GoalSpecification FOUND A SOLUTION
+{'id': 'eq3', 'node': {'expression': Eq(x, -1), 'type': 'solution', 'variable': 'x', 'parents': ['eq2'], 'generated_by': 'solve', 'description': 'Solution of eq2'}}
 ```
 
 
