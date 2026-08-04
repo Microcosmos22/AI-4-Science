@@ -141,7 +141,7 @@ Deduction
 
 Induction
 
-> Given noisy observations of a trajectory \( (t,x,y) \) infer the mathematical model that best explains the data.
+> Given noisy observations of a trajectory \( t,x,y \) infer the mathematical model that best explains the data.
 
 The long-term vision is that both tasks are instances of the same underlying problem:
 
