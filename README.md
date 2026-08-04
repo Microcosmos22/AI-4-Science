@@ -1,25 +1,35 @@
 # A symbolic reasoner for physics problems
 ### Motivation
-Using one-query-answer LLMs to perform research has the problem of memorized answers, algebraic errors, references to
-poor literature, not to mention a lack of scientific curiosity and initiative.
+Current one-shot LLMs can assist scientists by generating explanations, code, or mathematical derivations. However, they are fundamentally limited as autonomous research systems: they may rely on memorized knowledge, produce algebraic errors, cite unreliable literature, and cannot systematically verify or refine their own hypotheses through experimentation.
 
-Using LLMs for scientific planning, while outsourcing the algebra, literature retrieval and simulation design permits
-continuous checking and improvement of hypothesis in so called closed-loop research.
-The goal of AI-4-Science is to automate the complete research process just like a scientist would work, with the ultimate
-goal to discover new fields of physics.
+AI-4-Science approaches this problem differently. Instead of using an LLM as the reasoning engine, the LLM acts as a scientific planner that orchestrates specialized tools for **symbolic mathematics, literature retrieval, numerical simulation, and data analysis**. Each intermediate result is stored in a structured knowledge graph and can be independently verified, reused, or revised.
 
-An example research process might look like:
+This architecture enables closed-loop scientific reasoning, where hypotheses are continuously generated, tested, and refined based on analytical results, simulations, and newly acquired knowledge.
+
+The long-term goal is to automate the scientific discovery process itself—from literature exploration to hypothesis generation and experimental validation—with the eventual aim of discovering previously unknown physical laws.
+
+An example closed-loop research process might look like:
 
 ```
-Literature retrieval
-|
-New hypothesis from combination or analogy
-|
-Draw analytical conclusions / predict observation
-|
-Perform Python simulation
-|
-Theory imperfect, re-formulate better hypothesis from literature
+Literature Retrieval
+│
+▼
+Hypothesis Generation
+│
+▼
+Symbolic Analysis / Mathematical Derivations
+│
+▼
+Simulation or Experimental Prediction
+│
+▼
+Compare with Observations
+│
+▼
+Refine Hypothesis using New Evidence
+│
+└──────────────────────────────┐
+                               ▼ Repeat until convergence
 ```
 
 ### Techniques: Knowledge-graphs
