@@ -93,17 +93,17 @@ Each symbolic operation expands the graph by generating new knowledge nodes. Mos
 
 Current optimizations include
 
--goal-aware expansion,
--duplicate pruning,
--symbolic verification,
--explicit provenance tracking.
+- goal-aware expansion,
+- duplicate pruning,
+- symbolic verification,
+- explicit provenance tracking.
 
 The same search framework naturally applies to
 
--symbolic deduction,
--hypothesis generation,
--equation discovery,
--scientific workflows.
+- symbolic deduction,
+- hypothesis generation,
+- equation discovery,
+- scientific workflows.
 ### Roadmap
 
 Problem solving and scientific discovery are fundamentally the same search process.
@@ -114,11 +114,11 @@ Ultimately, every scientific theory is evaluated against reality. Observations t
 
 The long-term objective is to train the planner to make increasingly effective research decisions by maximizing criteria such as
 
-1.predictive power,
-2.simplicity and compression,
-3.generality,
-4.novelty,
-5.precision.
+1. predictive power,
+2. simplicity and compression,
+3. generality,
+4. novelty,
+5. precision.
 
 Current roadmap:
 
