@@ -8,55 +8,35 @@ class GoalCondition:
     def evaluate(self, candidate, state):
         raise NotImplementedError
 
-
 class FitsMeasurements(GoalCondition):
-    """
-    Candidate predicts outputs y=f(x).
 
-    x and y may be vectors of arbitrary dimension.
-
-    Notice that (x_i, y_i) can naturally be
-
-    x_i ∈ R^m
-    y_i ∈ R^n
-
-    so this covers
-
-    scalar regression
-    multivariate regression
-    trajectories
-    PDE snapshots
-    robot trajectories
-    astronomical observations
-
-    without changing anything.
-    """
-
-    def __init__(self, measurements, tolerance=None):
+    def __init__(self, measurements, tolerance=0.01):
         self.measurements = measurements
         self.tolerance = tolerance
 
     def evaluate(self, candidate, state):
+        print(candidate)
+        model = candidate["expression"]
 
         residuals = []
 
-        for x_i, y_i in self.measurements:
+        for measurement in self.measurements:
 
-            y_pred = candidate(x_i)
+            t = measurement["t"]
+            x_true = measurement["x"]
+            y_true = measurement["y"]
 
-            residuals.append(y_pred - y_i)
+            x_pred = model["x"](t)
+            y_pred = model["y"](t)
 
-        variance_residual = variance(residuals)
+            residuals.append(
+                (x_pred - x_true)**2 +
+                (y_pred - y_true)**2
+            )
 
-        score = variance_residual
+        mse = sum(residuals) / len(residuals)
 
-        if self.tolerance is None:
-            success = False
-
-        else:
-            success = variance_residual <= self.tolerance
-
-        return success, score
+        return mse < self.tolerance, mse
 
 
 class DerivativeEqualsZero(GoalCondition):

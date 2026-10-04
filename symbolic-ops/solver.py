@@ -37,40 +37,6 @@ def state_to_prompt(state):
 
     return text
 
-with open(r"..\data\projectile.json", "r") as f:
-    observations = json.load(f)
-
-state_trajectory = {
-
-    "goal": "Find the trajectory function given a set of points in a plane over time (x,y,t)",
-
-    "equations": {
-
-        "obs1": {
-
-            "expression": observations,
-
-            "type": "dataset",
-
-            "object_type": "dataset",
-
-            "description": "Projectile measurements"
-        }
-    }
-}
-
-state = {
-    "goal": "Find the stationary points of x**2 + 2*x + 1",
-    "equations": {
-        "eq1": {
-            "expression": x**2+2*x+1,
-            "type": "function",
-            "variable": "x",
-            "description": "quadratic polynomial"
-        }
-    }
-}
-
 
 def create_prompt(state):
     return f"""
@@ -223,6 +189,99 @@ def create_action_grammar(state):
 
     return LlamaGrammar.from_string(grammar)
 
+with open(r"..\data\projectile.json", "r") as f:
+    projectile = json.load(f)
+
+state_trajectory = projectile
+
+state = {
+    "goal": "Find the stationary points of x**2 + 2*x + 1",
+    "equations": {
+        "eq1": {
+            "expression": x**2+2*x+1,
+            "type": "function",
+            "variable": "x",
+            "description": "quadratic polynomial"
+        }
+    }
+}
+
+
+"""
+#########################################
+"""
+
+llm = Llama(model_path=r"C:\Users\PC\Documents\Github-RAG\qwen2.5-coder-7b-instruct-q4_k_m-00001-of-00002.gguf",n_ctx=2048,n_threads=8, verbose=False)
+existing_eqs = []
+
+from goal_compiler import compile_goal
+
+goal_specification = compile_goal(f"{state['goal']}\n\n", llm)
+print(goal_specification)
+
+while True:
+
+    solved = False
+
+    """ Return nodes with the expected solution type (number or function etc.) """
+    candidates = CandidateExtractor.extract(state,goal_specification.object_type)
+
+    for candidate in candidates:
+        all_success = True
+        total_score = 0
+
+        for condition in goal_specification.conditions:
+            success, score = condition.evaluate(candidate,state)
+
+            all_success &= success
+            total_score += score
+
+        if all_success:
+            print("SOLUTION")
+            print(candidate)
+            solved = True
+            break
+    if solved:
+        break
+
+    prompt = create_prompt(state)
+    grammar = create_action_grammar(state)
+
+    response = llm(
+        prompt,
+        max_tokens=64,
+        temperature=0,
+        grammar=grammar
+    )
+
+
+
+    if len(response["choices"][0]["text"].split()) == 3:
+        tool, node, variable = response["choices"][0]["text"].split()
+    else:
+        tool, node = response["choices"][0]["text"].split()
+
+    if tool in OPERATIONS:
+
+        executor = OPERATIONS[tool]["executor"]
+
+        if tool in ["differentiate", "solve"]:
+            new_node = executor(
+                state,
+                node,
+                variable
+            )
+
+        elif tool == "simplify":
+            new_node = executor(
+                state,
+                node
+            )
+
+        if not is_duplicate_expression(state, new_node["expression"]):
+            new_id = get_new_equation_id(state)
+            state["equations"][new_id] = new_node
+
 
 
 """
@@ -240,13 +299,15 @@ print(goal_specification)
 while True:
 
     solved = False
-
+    print("ALL NODES ")
+    print(state_trajectory)
     """ Return nodes with the expected solution type (number or function etc.) """
     candidates = CandidateExtractor.extract(state_trajectory,goal_specification.object_type)
 
     for candidate_node in candidates:
         all_success = True
         total_score = 0
+        print(candidate_node)
 
         for condition in goal_specification.conditions:
             success, score = condition.evaluate(candidate_node,state_trajectory)
@@ -274,105 +335,41 @@ while True:
         grammar=grammar
     )
 
+    print(prompt)
+    #print(grammar)
+    print(response["choices"][0]["text"])
+
     if len(response["choices"][0]["text"].split()) == 3:
-        tool, equation, variable = response["choices"][0]["text"].split()
+        tool, node, variable = response["choices"][0]["text"].split()
     else:
-        tool, equation = response["choices"][0]["text"].split()
+        tool, node = response["choices"][0]["text"].split()
 
     if tool in OPERATIONS:
 
         executor = OPERATIONS[tool]["executor"]
 
         if tool in ["differentiate", "solve"]:
-            new_node = executor(
-                state_trajectory,
-                equation,
-                variable
-            )
+            new_node = executor(state_trajectory,node,variable)
 
         elif tool == "simplify":
-            new_node = executor(
-                state_trajectory,
-                equation
-            )
+            new_node = executor(state_trajectory,node)
 
         if not is_duplicate_expression(state_trajectory, new_node["expression"]):
             new_id = get_new_equation_id(state_trajectory)
-            state_trajectory["equations"][new_id] = new_node
+            state_trajectory["obs_or_eqs"][new_id] = new_node
 
+    elif tool in MODEL_LIBRARY:
 
+        expression = MODEL_LIBRARY[tool]["expression"]
+        params = MODEL_LIBRARY[tool]["parameters"]
 
-"""
-#########################################
-"""
+        new_node = {
+            "expression": template["expression"],
+            "parameters": template["parameters"],
+            "object_type": "model",
+            "model_family": "quadratic",
+            "parents": ["obs1"],
+            "generated_by": "GenerateModel"
+        }
 
-llm = Llama(model_path=r"C:\Users\PC\Documents\Github-RAG\qwen2.5-coder-7b-instruct-q4_k_m-00001-of-00002.gguf",n_ctx=2048,n_threads=8, verbose=False)
-existing_eqs = []
-
-from goal_compiler import compile_goal
-
-goal_specification = compile_goal(f"{state['goal']}\n\n", llm)
-
-
-while True:
-
-    solved = False
-
-    """ Return nodes with the expected solution type (number or function etc.) """
-    candidates = CandidateExtractor.extract(state,goal_specification.object_type)
-
-    for candidate in candidates:
-        all_success = True
-        total_score = 0
-
-        for condition in goal_specification.conditions:
-            success, score = condition.evaluate(candidate,state)
-
-            all_success &= success
-            total_score += score
-
-        if all_success:
-            print("SOLUTION")
-            print(candidate)
-            solved = True
-            break
-    if solved:
-        break
-
-
-
-    prompt = create_prompt(state)
-    grammar = create_action_grammar(state)
-
-    response = llm(
-        prompt,
-        max_tokens=64,
-        temperature=0,
-        grammar=grammar
-    )
-
-    if len(response["choices"][0]["text"].split()) == 3:
-        tool, equation, variable = response["choices"][0]["text"].split()
-    else:
-        tool, equation = response["choices"][0]["text"].split()
-
-    if tool in OPERATIONS:
-
-        executor = OPERATIONS[tool]["executor"]
-
-        if tool in ["differentiate", "solve"]:
-            new_node = executor(
-                state,
-                equation,
-                variable
-            )
-
-        elif tool == "simplify":
-            new_node = executor(
-                state,
-                equation
-            )
-
-        if not is_duplicate_expression(state, new_node["expression"]):
-            new_id = get_new_equation_id(state)
-            state["equations"][new_id] = new_node
+        estimate_parameters(state, model_id)

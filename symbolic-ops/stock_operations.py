@@ -1,6 +1,7 @@
 from sympy import *
 from llama_cpp import Llama, LlamaGrammar
 import json
+from fitters.least_squares import fit
 
 def differentiate(state, equation, variable):
 
@@ -93,6 +94,30 @@ def substitute(state, target_eq, substitution_eq):
         "description": f"Substitute {substitution_eq} into {target_eq}"
     }
 
+def estimate_parameters(state,model_id):
+    model = state["equations"][model_id]
+
+    dataset = state["equations"][model["parents"][0]]
+
+    fitted_expression = fit(model["expression"], model["parameters"], model["independent_variables"],
+            model["dependent_variables"], model["observations"])
+    fit(
+        model["expression"],
+        model["parameters"],
+        dataset["expression"]["observations"]
+    )
+
+    return {
+
+        "expression": fitted_expression,
+
+        "object_type": "function",
+
+        "parents":[model_id],
+
+        "generated_by":"EstimateParameters"
+    }
+
 
 OPERATIONS = {
 
@@ -114,5 +139,10 @@ OPERATIONS = {
     "substitute": {
         "inputs": 2,
         "executor": substitute
+    },
+
+    "EstimateParameters": {
+
+        "executor": estimate_parameters
     }
 }

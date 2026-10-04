@@ -1,7 +1,7 @@
 {
-    "goal": "Find the trajectory function of the projectile.",
+    "goal": "Find the function given a set of points in a plane over time (x,y,t)",
 
-    "observations": [
+    "obs_or_eqs": [
         {"t":0.0,"x":0.03,"y":0.01},
         {"t":0.1,"x":1.02,"y":1.46},
         {"t":0.2,"x":2.00,"y":2.81},
@@ -13,5 +13,11 @@
         {"t":0.8,"x":8.00,"y":7.47},
         {"t":0.9,"x":8.98,"y":7.51},
         {"t":1.0,"x":10.02,"y":7.33}
-    ]
+    ],
+
+    "independent": ["t"],
+    "dependent": ["x", "y"],
+    "type": "dataset",
+    "description": "Projectile measurements",
+    "solution": "false"
 }

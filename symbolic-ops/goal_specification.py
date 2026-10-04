@@ -32,7 +32,7 @@ class CandidateExtractor:
 
         candidates = []
 
-        for eq_id, node in state["equations"].items():
+        for eq_id, node in state.items():
 
             if object_type == "number":
 
